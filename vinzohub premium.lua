@@ -538,7 +538,7 @@ local startBtn    = btn(featureTab, "▶ START AutoFarm")
 local stopBtn     = btn(featureTab, "⏹ STOP")
 local statusLabel = makeLabel(featureTab, "Macro: idle")
 
-local SCAN_RADIUS = 20
+local SCAN_RADIUS = 10
 local scannedPrompts = {}
 
 local function stopPromptScan()
@@ -575,7 +575,7 @@ local function doPromptScan(statusLbl, countLbl)
 						holdDuration = v.HoldDuration
 					}
 					v.Enabled = true
-					v.MaxActivationDistance = 20
+					v.MaxActivationDistance = 10
 					v.RequiresLineOfSight = false
 					v.HoldDuration = 0
 					found += 1
