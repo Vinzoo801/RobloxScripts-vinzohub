@@ -227,7 +227,8 @@ local discordLabel = Instance.new("TextLabel", card)
 discordLabel.Size                   = UDim2.new(1, -40, 0, 20)
 discordLabel.Position               = UDim2.new(0, 20, 0, 228)
 discordLabel.BackgroundTransparency = 1
-discordLabel.Text                   = "🔗 Beli key: discord.gg/c7JtbZpyDQ"
+discordLabel.Text                   = "🔗 Beli key: https://discord.gg/W8ssuK6mea 
+"
 discordLabel.TextColor3             = Color3.fromRGB(100, 100, 160)
 discordLabel.Font                   = Enum.Font.Gotham
 discordLabel.TextSize               = 12
