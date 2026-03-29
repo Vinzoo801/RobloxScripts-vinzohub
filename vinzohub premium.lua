@@ -160,7 +160,7 @@ discordLabel.TextXAlignment   = Enum.TextXAlignment.Left
 local function validateKey(key)
 	local ok, result = pcall(function()
 		local response = HttpService:RequestAsync({
-			Url    = VPS_URL .. "/validate",
+			Url    = VPS_URL .. "https://play.galaxyhost.biz.id:62212/validate",
 			Method = "POST",
 			Headers = { ["Content-Type"] = "application/json" },
 			Body   = HttpService:JSONEncode({
