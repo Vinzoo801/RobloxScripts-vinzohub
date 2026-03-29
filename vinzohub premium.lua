@@ -1,4 +1,314 @@
---// VINZOHUB GOD MODE PREMIUM 🔥
+-- =====================================================
+-- VINZOHUB KEY SYSTEM - HTTP Validation
+-- Taruh di ATAS semua code (sebelum GUI utama)
+-- Ganti YOUR_VPS_IP dengan IP VPS kamu
+-- =====================================================
+
+local VPS_URL = "http://play.galaxyhost.biz.id:62212"  -- ganti ini
+
+local Players          = game:GetService("Players")
+local TweenService     = game:GetService("TweenService")
+local HttpService       = game:GetService("HttpService")
+local UserInputService = game:GetService("UserInputService")
+local RunService       = game:GetService("RunService")
+
+local player    = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- =====================================================
+-- DESTROY EXISTING
+-- =====================================================
+for _, v in pairs(playerGui:GetChildren()) do
+	if v.Name:find("VINZO") then v:Destroy() end
+end
+
+-- =====================================================
+-- KEY GUI
+-- =====================================================
+local keyGui = Instance.new("ScreenGui")
+keyGui.Name          = "VINZOHUB_KEY"
+keyGui.ResetOnSpawn  = false
+keyGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+keyGui.Parent        = playerGui
+
+-- Background blur-style overlay
+local overlay = Instance.new("Frame", keyGui)
+overlay.Size                = UDim2.new(1, 0, 1, 0)
+overlay.BackgroundColor3    = Color3.fromRGB(0, 0, 0)
+overlay.BackgroundTransparency = 0.45
+overlay.ZIndex              = 5
+
+-- Main card
+local card = Instance.new("Frame", keyGui)
+card.Size            = UDim2.new(0, 420, 0, 280)
+card.Position        = UDim2.new(0.5, -210, 0.5, -140)
+card.BackgroundColor3 = Color3.fromRGB(12, 10, 20)
+card.ZIndex          = 10
+Instance.new("UICorner", card).CornerRadius = UDim.new(0, 14)
+
+local stroke = Instance.new("UIStroke", card)
+stroke.Color     = Color3.fromRGB(140, 0, 255)
+stroke.Thickness = 2.5
+
+-- Header bar
+local headerBar = Instance.new("Frame", card)
+headerBar.Size             = UDim2.new(1, 0, 0, 50)
+headerBar.BackgroundColor3 = Color3.fromRGB(120, 0, 255)
+headerBar.ZIndex           = 11
+Instance.new("UICorner", headerBar).CornerRadius = UDim.new(0, 14)
+
+-- Fix corner bawah header
+local headerFix = Instance.new("Frame", headerBar)
+headerFix.Size             = UDim2.new(1, 0, 0.5, 0)
+headerFix.Position         = UDim2.new(0, 0, 0.5, 0)
+headerFix.BackgroundColor3 = Color3.fromRGB(120, 0, 255)
+headerFix.BorderSizePixel  = 0
+headerFix.ZIndex           = 10
+
+local logoLabel = Instance.new("TextLabel", headerBar)
+logoLabel.Size             = UDim2.new(1, 0, 1, 0)
+logoLabel.BackgroundTransparency = 1
+logoLabel.Text             = "🔑 VINZOHUB"
+logoLabel.TextColor3       = Color3.new(1, 1, 1)
+logoLabel.Font             = Enum.Font.GothamBlack
+logoLabel.TextSize         = 22
+logoLabel.ZIndex           = 12
+
+local subLabel = Instance.new("TextLabel", card)
+subLabel.Size             = UDim2.new(1, 0, 0, 20)
+subLabel.Position         = UDim2.new(0, 0, 0, 58)
+subLabel.BackgroundTransparency = 1
+subLabel.Text             = "Masukkan key untuk melanjutkan"
+subLabel.TextColor3       = Color3.fromRGB(180, 130, 255)
+subLabel.Font             = Enum.Font.Gotham
+subLabel.TextSize         = 13
+subLabel.ZIndex           = 11
+
+-- Input box
+local inputBox = Instance.new("TextBox", card)
+inputBox.Size             = UDim2.new(1, -40, 0, 42)
+inputBox.Position         = UDim2.new(0, 20, 0, 90)
+inputBox.BackgroundColor3 = Color3.fromRGB(22, 18, 35)
+inputBox.TextColor3       = Color3.new(1, 1, 1)
+inputBox.Font             = Enum.Font.GothamBold
+inputBox.TextSize         = 15
+inputBox.PlaceholderText  = "VNZ-XXXX-XXXX-XXXX"
+inputBox.PlaceholderColor3 = Color3.fromRGB(100, 80, 130)
+inputBox.ClearTextOnFocus = false
+inputBox.ZIndex           = 12
+inputBox.BorderSizePixel  = 0
+Instance.new("UICorner", inputBox).CornerRadius = UDim.new(0, 8)
+local inputStroke = Instance.new("UIStroke", inputBox)
+inputStroke.Color     = Color3.fromRGB(100, 0, 200)
+inputStroke.Thickness = 1.5
+
+local inputPad = Instance.new("UIPadding", inputBox)
+inputPad.PaddingLeft  = UDim.new(0, 12)
+inputPad.PaddingRight = UDim.new(0, 12)
+
+-- Status label
+local statusLabel = Instance.new("TextLabel", card)
+statusLabel.Size             = UDim2.new(1, -40, 0, 22)
+statusLabel.Position         = UDim2.new(0, 20, 0, 140)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Text             = ""
+statusLabel.TextColor3       = Color3.fromRGB(0, 220, 120)
+statusLabel.Font             = Enum.Font.GothamBold
+statusLabel.TextSize         = 13
+statusLabel.ZIndex           = 12
+statusLabel.TextXAlignment   = Enum.TextXAlignment.Left
+
+-- Submit button
+local submitBtn = Instance.new("TextButton", card)
+submitBtn.Size             = UDim2.new(1, -40, 0, 44)
+submitBtn.Position         = UDim2.new(0, 20, 0, 172)
+submitBtn.BackgroundColor3 = Color3.fromRGB(120, 0, 255)
+submitBtn.TextColor3       = Color3.new(1, 1, 1)
+submitBtn.Font             = Enum.Font.GothamBold
+submitBtn.TextSize         = 16
+submitBtn.Text             = "✅ SUBMIT KEY"
+submitBtn.ZIndex           = 12
+submitBtn.BorderSizePixel  = 0
+Instance.new("UICorner", submitBtn).CornerRadius = UDim.new(0, 9)
+
+submitBtn.MouseEnter:Connect(function()
+	TweenService:Create(submitBtn, TweenInfo.new(0.15), {
+		BackgroundColor3 = Color3.fromRGB(160, 30, 255)
+	}):Play()
+end)
+submitBtn.MouseLeave:Connect(function()
+	TweenService:Create(submitBtn, TweenInfo.new(0.15), {
+		BackgroundColor3 = Color3.fromRGB(120, 0, 255)
+	}):Play()
+end)
+
+-- Discord link label
+local discordLabel = Instance.new("TextLabel", card)
+discordLabel.Size             = UDim2.new(1, -40, 0, 20)
+discordLabel.Position         = UDim2.new(0, 20, 0, 226)
+discordLabel.BackgroundTransparency = 1
+discordLabel.Text             = "🔗 Beli key: discord.gg/c7JtbZpyDQ"
+discordLabel.TextColor3       = Color3.fromRGB(100, 100, 160)
+discordLabel.Font             = Enum.Font.Gotham
+discordLabel.TextSize         = 12
+discordLabel.ZIndex           = 12
+discordLabel.TextXAlignment   = Enum.TextXAlignment.Left
+
+-- =====================================================
+-- VALIDATE KEY FUNCTION
+-- =====================================================
+local function validateKey(key)
+	local ok, result = pcall(function()
+		local response = HttpService:RequestAsync({
+			Url    = VPS_URL .. "/validate",
+			Method = "POST",
+			Headers = { ["Content-Type"] = "application/json" },
+			Body   = HttpService:JSONEncode({
+				key      = key,
+				username = player.Name,
+				userId   = tostring(player.UserId)
+			})
+		})
+		return HttpService:JSONDecode(response.Body)
+	end)
+	if not ok then
+		return false, "❌ Gagal koneksi ke server!"
+	end
+	if result.valid then
+		return true, result.message or "✅ Key valid!"
+	else
+		return false, "❌ " .. (result.message or "Key tidak valid!")
+	end
+end
+
+-- =====================================================
+-- SUBMIT HANDLER
+-- =====================================================
+local checking = false
+
+local function doSubmit()
+	if checking then return end
+	local key = inputBox.Text:match("^%s*(.-)%s*$") -- trim whitespace
+
+	if key == "" then
+		statusLabel.Text      = "⚠️ Key tidak boleh kosong!"
+		statusLabel.TextColor3 = Color3.fromRGB(255, 180, 0)
+		return
+	end
+
+	checking = true
+	submitBtn.Text        = "⏳ Memeriksa..."
+	submitBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 80)
+	statusLabel.Text      = "🔍 Validasi key..."
+	statusLabel.TextColor3 = Color3.fromRGB(0, 200, 255)
+
+	task.spawn(function()
+		local valid, msg = validateKey(key)
+
+		if valid then
+			statusLabel.Text      = "✅ " .. msg
+			statusLabel.TextColor3 = Color3.fromRGB(0, 220, 100)
+			submitBtn.Text        = "✅ BERHASIL!"
+			submitBtn.BackgroundColor3 = Color3.fromRGB(30, 160, 70)
+			task.wait(1.2)
+			-- Tutup key GUI, jalankan main script
+			keyGui:Destroy()
+			task.spawn(loadMainScript)  -- function di bawah
+		else
+			statusLabel.Text      = msg
+			statusLabel.TextColor3 = Color3.fromRGB(255, 70, 70)
+			submitBtn.Text        = "✅ SUBMIT KEY"
+			submitBtn.BackgroundColor3 = Color3.fromRGB(120, 0, 255)
+
+			-- Kick jika key salah 3x (opsional, uncomment kalau mau)
+			-- Players.LocalPlayer:Kick("Key salah! Beli di discord.gg/c7JtbZpyDQ")
+		end
+		checking = false
+	end)
+end
+
+submitBtn.MouseButton1Click:Connect(doSubmit)
+inputBox.FocusLost:Connect(function(enterPressed)
+	if enterPressed then doSubmit() end
+end)
+
+-- =====================================================
+-- ANIMASI MASUK
+-- =====================================================
+card.Position = UDim2.new(0.5, -210, 1.5, 0)
+TweenService:Create(card, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+	Position = UDim2.new(0.5, -210, 0.5, -140)
+}):Play()
+
+-- =====================================================
+-- MAIN SCRIPT LOADER
+-- =====================================================
+function loadMainScript()
+
+-- =====================================================
+-- NOTIF
+-- =====================================================
+local notifGui = Instance.new("ScreenGui")
+notifGui.Name = "VINZOHUB_NOTIF"
+notifGui.Parent = playerGui
+
+local notifFrame = Instance.new("Frame", notifGui)
+notifFrame.Size = UDim2.new(0,350,0,80)
+notifFrame.Position = UDim2.new(1,-360,0,100)
+notifFrame.BackgroundColor3 = Color3.fromRGB(20,20,30)
+notifFrame.BorderSizePixel = 0
+Instance.new("UICorner", notifFrame).CornerRadius = UDim.new(0,8)
+
+local notifText = Instance.new("TextLabel", notifFrame)
+notifText.Size = UDim2.new(1,-10,1,-10)
+notifText.Position = UDim2.new(0,5,0,5)
+notifText.BackgroundTransparency = 1
+notifText.TextColor3 = Color3.new(1,1,1)
+notifText.Font = Enum.Font.SourceSansBold
+notifText.TextSize = 18
+notifText.TextWrapped = true
+notifText.TextXAlignment = Enum.TextXAlignment.Left
+notifText.TextYAlignment = Enum.TextYAlignment.Top
+
+task.spawn(function()
+	local msg = "PESAN DARI OWNER VINZOOX : Makasih udah order\nKalau ada bug report di Discord."
+	for i = 1, #msg do
+		notifText.Text = string.sub(msg,1,i)
+		task.wait(0.03)
+	end
+	task.wait(5)
+	notifGui:Destroy()
+end)
+
+-- =====================================================
+-- INTRO
+-- =====================================================
+local introGui = Instance.new("ScreenGui")
+introGui.Name = "VINZOHUB_INTRO"
+introGui.Parent = playerGui
+
+local introFrame = Instance.new("Frame", introGui)
+introFrame.Size = UDim2.new(1,0,1,0)
+introFrame.BackgroundTransparency = 1
+
+local logo = Instance.new("TextLabel", introFrame)
+logo.Size = UDim2.new(0,400,0,100)
+logo.Position = UDim2.new(0.5,-200,-0.3,0)
+logo.BackgroundTransparency = 1
+logo.Text = "VINZOHUB"
+logo.TextColor3 = Color3.fromRGB(0,255,255)
+logo.Font = Enum.Font.GothamBlack
+logo.TextSize = 60
+
+TweenService:Create(logo, TweenInfo.new(1), {Position = UDim2.new(0.5,-200,0.5,-50)}):Play()
+task.wait(1.5)
+TweenService:Create(logo, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+task.wait(0.6)
+introGui:Destroy()
+
+-- =====================================================
+-- SEMUA CODE GUI UTAMA KAMU DI BAWAH INI
+-- (--// VINZOHUB GOD MODE PREMIUM 🔥
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -575,10 +885,10 @@ local function doPromptScan(statusLbl, countLbl)
 						holdDuration = v.HoldDuration
 					}
 					v.Enabled = true
-					v.MaxActivationDistance = 25
+					v.MaxActivationDistance = 20
 					v.RequiresLineOfSight = false
 					v.HoldDuration = 0
-					found += 3
+					found += 1
 				end
 			end
 		end
@@ -2027,3 +2337,7 @@ closeBtn.Activated:Connect(function()
 	pcall(function() skelGui:Destroy() end)
 	if gui then gui:Destroy() end
 end)
+--)
+-- =====================================================
+
+end -- end loadMainScript
