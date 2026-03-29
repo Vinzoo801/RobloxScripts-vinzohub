@@ -30,6 +30,7 @@ end
 -- =====================================================
 local KEY_DATABASE = {
 	-- key akan otomatis ditambah oleh bot Discord
+	["VNZ-61515AD56E334A95"] = { expired = "01/04/2026", lockedUser = nil },
 },
 },
 }
