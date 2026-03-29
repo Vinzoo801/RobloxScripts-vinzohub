@@ -4,7 +4,7 @@
 -- Ganti YOUR_VPS_IP dengan IP VPS kamu
 -- =====================================================
 
-local VPS_URL = "http://play.galaxyhost.biz.id:62212"  -- ganti ini
+local VPS_URL = "https://play.galaxyhost.biz.id:62212"  -- ganti ini
 
 local Players          = game:GetService("Players")
 local TweenService     = game:GetService("TweenService")
