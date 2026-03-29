@@ -30,7 +30,8 @@ end
 -- =====================================================
 local KEY_DATABASE = {
 	-- key akan otomatis ditambah oleh bot Discord
-	["VNZ-61515AD56E334A95"] = { expired = "01/04/2026", lockedUser = nil 	["VNZ-9AAE68F269B74096"] = { expired = "01/04/2026", lockedUser = nil 	["VNZ-2C522F68CCA64430"] = { expired = "01/04/2026", lockedUser = nil 	["VNZ-24A0E603D2AB4A3F"] = { expired = "01/04/2026", lockedUser = nil },
+	["VNZ-61515AD56E334A95"] = { expired = "01/04/2026", lockedUser = nil 	["VNZ-9AAE68F269B74096"] = { expired = "01/04/2026", lockedUser = nil 	["VNZ-2C522F68CCA64430"] = { expired = "01/04/2026", lockedUser = nil 	["VNZ-24A0E603D2AB4A3F"] = { expired = "01/04/2026", lockedUser = nil 	["VNZ-15A8A7849C4B4DAC"] = { expired = "01/04/2026", lockedUser = nil },
+},
 },
 },
 },
