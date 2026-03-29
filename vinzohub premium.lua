@@ -4,7 +4,7 @@
 -- Ganti YOUR_VPS_IP dengan IP VPS kamu
 -- =====================================================
 
-local VPS_URL = "https://play.galaxyhost.biz.id:62212"  -- ganti ini
+local VPS_URL = "https://tlkznstore.galaxyhost.biz.id/server/00773b8f"  -- ganti ini
 
 local Players          = game:GetService("Players")
 local TweenService     = game:GetService("TweenService")
@@ -160,7 +160,7 @@ discordLabel.TextXAlignment   = Enum.TextXAlignment.Left
 local function validateKey(key)
 	local ok, result = pcall(function()
 		local response = HttpService:RequestAsync({
-			Url    = VPS_URL .. "https://play.galaxyhost.biz.id:62212/validate",
+			Url    = VPS_URL .. "/validate",
 			Method = "POST",
 			Headers = { ["Content-Type"] = "application/json" },
 			Body   = HttpService:JSONEncode({
