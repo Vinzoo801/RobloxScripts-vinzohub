@@ -39,7 +39,8 @@ end
 -- =====================================================
 local KEY_DATABASE = {
 	-- key akan otomatis ditambah oleh bot Discord
-	["VNZ-D30A2F0CC8F34D72"] = { expired = "31/03/2026", lockedUser = nil },
+	["VNZ-D30A2F0CC8F34D72"] = { expired = "31/03/2026", lockedUser = nil 	["VNZ-8EEAB1492E3E4F9F"] = { expired = "02/04/2026", lockedUser = nil },
+},
 }
 
 -- =====================================================
