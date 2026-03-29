@@ -1,14 +1,8 @@
 -- =====================================================
 -- VINZOHUB KEY SYSTEM - Discord Webhook Version
--- Taruh di ATAS semua code (sebelum GUI utama)
 -- =====================================================
 
--- =====================================================
--- CONFIG - GANTI INI
--- =====================================================
 local WEBHOOK_URL = "https://discord.com/api/webhooks/1487782597009477663/Ml2kijtlJR_JTlhRIy9ReXEx5vZBdVfKbKK4p0pbJe6fI_vlS61_ZYBzSu8tMWc6kjHG"
--- Cara dapat webhook:
--- Discord Server -> Settings -> Integrations -> Webhooks -> New Webhook -> Copy URL
 
 -- =====================================================
 -- SERVICES
@@ -30,15 +24,12 @@ for _, v in pairs(playerGui:GetChildren()) do
 end
 
 -- =====================================================
--- DATABASE KEY (tambah key baru di sini)
+-- KEY DATABASE
+-- Bot Discord (!vnz gen) otomatis tambah key di sini
 -- Format: ["KEY"] = { expired = "DD/MM/YYYY" atau nil, lockedUser = nil }
 -- =====================================================
 local KEY_DATABASE = {
-	-- Contoh key permanent
-	-- ["VNZ-ABCD1234EFGH5678"] = { expired = nil, lockedUser = nil },
-	
-	-- Contoh key expire 7 hari (isi tanggal expired)
-	-- ["VNZ-XXXX1111YYYY2222"] = { expired = "05/04/2026", lockedUser = nil },
+	-- key akan otomatis ditambah oleh bot Discord
 }
 
 -- =====================================================
@@ -46,36 +37,29 @@ local KEY_DATABASE = {
 -- =====================================================
 local function validateKey(key)
 	local record = KEY_DATABASE[key]
-	
-	-- Key tidak ada
+
 	if not record then
 		return false, "❌ Key tidak ditemukan!"
 	end
-	
-	-- Cek expired
+
 	if record.expired then
 		local day   = tonumber(record.expired:sub(1,2))
 		local month = tonumber(record.expired:sub(4,5))
 		local year  = tonumber(record.expired:sub(7,10))
-		-- Bandingkan dengan tanggal sekarang (sederhana)
-		-- Format: DD/MM/YYYY
 		local expDate = os.time({year=year, month=month, day=day, hour=23, min=59, sec=59})
 		if os.time() > expDate then
 			return false, "❌ Key sudah expired! (" .. record.expired .. ")"
 		end
 	end
-	
-	-- Cek locked user (key sudah dipakai orang lain)
+
 	if record.lockedUser and record.lockedUser ~= player.Name then
 		return false, "❌ Key ini sudah dipakai oleh " .. record.lockedUser .. "!"
 	end
-	
-	-- Lock key ke user ini
+
 	if not record.lockedUser then
 		KEY_DATABASE[key].lockedUser = player.Name
 	end
-	
-	-- Kirim notif ke Discord via Webhook
+
 	local expStr = record.expired or "Permanent"
 	pcall(function()
 		HttpService:RequestAsync({
@@ -85,15 +69,15 @@ local function validateKey(key)
 			Body   = HttpService:JSONEncode({
 				embeds = {{
 					title       = "🔑 Key Digunakan",
-					description = "**Key:** `" .. key .. "`\n**User:** " .. player.Name .. " (" .. player.UserId .. ")\n**Expired:** " .. expStr,
-					color       = 9109504, -- ungu
+					description = "**Key:** `" .. key .. "`\n**User:** " .. player.Name .. " (" .. tostring(player.UserId) .. ")\n**Expired:** " .. expStr,
+					color       = 9109504,
 					footer      = { text = "VINZOHUB Key System" },
 					timestamp   = os.date("!%Y-%m-%dT%H:%M:%SZ")
 				}}
 			})
 		})
 	end)
-	
+
 	return true, "✅ Welcome " .. player.Name .. "! Exp: " .. expStr
 end
 
@@ -123,7 +107,6 @@ local stroke = Instance.new("UIStroke", card)
 stroke.Color     = Color3.fromRGB(140, 0, 255)
 stroke.Thickness = 2.5
 
--- Header
 local headerBar = Instance.new("Frame", card)
 headerBar.Size             = UDim2.new(1, 0, 0, 50)
 headerBar.BackgroundColor3 = Color3.fromRGB(120, 0, 255)
@@ -138,25 +121,24 @@ headerFix.BorderSizePixel  = 0
 headerFix.ZIndex           = 10
 
 local logoLabel = Instance.new("TextLabel", headerBar)
-logoLabel.Size                 = UDim2.new(1, 0, 1, 0)
+logoLabel.Size                   = UDim2.new(1, 0, 1, 0)
 logoLabel.BackgroundTransparency = 1
-logoLabel.Text                 = "🔑 VINZOHUB"
-logoLabel.TextColor3           = Color3.new(1, 1, 1)
-logoLabel.Font                 = Enum.Font.GothamBlack
-logoLabel.TextSize             = 22
-logoLabel.ZIndex               = 12
+logoLabel.Text                   = "🔑 VINZOHUB"
+logoLabel.TextColor3             = Color3.new(1, 1, 1)
+logoLabel.Font                   = Enum.Font.GothamBlack
+logoLabel.TextSize               = 22
+logoLabel.ZIndex                 = 12
 
 local subLabel = Instance.new("TextLabel", card)
-subLabel.Size                 = UDim2.new(1, 0, 0, 20)
-subLabel.Position             = UDim2.new(0, 0, 0, 58)
+subLabel.Size                   = UDim2.new(1, 0, 0, 20)
+subLabel.Position               = UDim2.new(0, 0, 0, 58)
 subLabel.BackgroundTransparency = 1
-subLabel.Text                 = "Masukkan key untuk melanjutkan"
-subLabel.TextColor3           = Color3.fromRGB(180, 130, 255)
-subLabel.Font                 = Enum.Font.Gotham
-subLabel.TextSize             = 13
-subLabel.ZIndex               = 11
+subLabel.Text                   = "Masukkan key untuk melanjutkan"
+subLabel.TextColor3             = Color3.fromRGB(180, 130, 255)
+subLabel.Font                   = Enum.Font.Gotham
+subLabel.TextSize               = 13
+subLabel.ZIndex                 = 11
 
--- Input box
 local inputBox = Instance.new("TextBox", card)
 inputBox.Size              = UDim2.new(1, -40, 0, 42)
 inputBox.Position          = UDim2.new(0, 20, 0, 90)
@@ -178,19 +160,17 @@ local inputPad = Instance.new("UIPadding", inputBox)
 inputPad.PaddingLeft  = UDim.new(0, 12)
 inputPad.PaddingRight = UDim.new(0, 12)
 
--- Status label
 local statusLabel = Instance.new("TextLabel", card)
-statusLabel.Size                 = UDim2.new(1, -40, 0, 22)
-statusLabel.Position             = UDim2.new(0, 20, 0, 140)
+statusLabel.Size                   = UDim2.new(1, -40, 0, 22)
+statusLabel.Position               = UDim2.new(0, 20, 0, 140)
 statusLabel.BackgroundTransparency = 1
-statusLabel.Text                 = ""
-statusLabel.TextColor3           = Color3.fromRGB(0, 220, 120)
-statusLabel.Font                 = Enum.Font.GothamBold
-statusLabel.TextSize             = 13
-statusLabel.ZIndex               = 12
-statusLabel.TextXAlignment       = Enum.TextXAlignment.Left
+statusLabel.Text                   = ""
+statusLabel.TextColor3             = Color3.fromRGB(0, 220, 120)
+statusLabel.Font                   = Enum.Font.GothamBold
+statusLabel.TextSize               = 13
+statusLabel.ZIndex                 = 12
+statusLabel.TextXAlignment         = Enum.TextXAlignment.Left
 
--- Submit button
 local submitBtn = Instance.new("TextButton", card)
 submitBtn.Size             = UDim2.new(0.65, -25, 0, 44)
 submitBtn.Position         = UDim2.new(0, 20, 0, 172)
@@ -204,17 +184,12 @@ submitBtn.BorderSizePixel  = 0
 Instance.new("UICorner", submitBtn).CornerRadius = UDim.new(0, 9)
 
 submitBtn.MouseEnter:Connect(function()
-	TweenService:Create(submitBtn, TweenInfo.new(0.15), {
-		BackgroundColor3 = Color3.fromRGB(160, 30, 255)
-	}):Play()
+	TweenService:Create(submitBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(160, 30, 255)}):Play()
 end)
 submitBtn.MouseLeave:Connect(function()
-	TweenService:Create(submitBtn, TweenInfo.new(0.15), {
-		BackgroundColor3 = Color3.fromRGB(120, 0, 255)
-	}):Play()
+	TweenService:Create(submitBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(120, 0, 255)}):Play()
 end)
 
--- Close button
 local closeKeyBtn = Instance.new("TextButton", card)
 closeKeyBtn.Size             = UDim2.new(0.35, -15, 0, 44)
 closeKeyBtn.Position         = UDim2.new(0.65, 5, 0, 172)
@@ -228,14 +203,10 @@ closeKeyBtn.BorderSizePixel  = 0
 Instance.new("UICorner", closeKeyBtn).CornerRadius = UDim.new(0, 9)
 
 closeKeyBtn.MouseEnter:Connect(function()
-	TweenService:Create(closeKeyBtn, TweenInfo.new(0.15), {
-		BackgroundColor3 = Color3.fromRGB(220, 50, 50)
-	}):Play()
+	TweenService:Create(closeKeyBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(220, 50, 50)}):Play()
 end)
 closeKeyBtn.MouseLeave:Connect(function()
-	TweenService:Create(closeKeyBtn, TweenInfo.new(0.15), {
-		BackgroundColor3 = Color3.fromRGB(180, 30, 30)
-	}):Play()
+	TweenService:Create(closeKeyBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(180, 30, 30)}):Play()
 end)
 closeKeyBtn.MouseButton1Click:Connect(function()
 	TweenService:Create(card, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
@@ -245,17 +216,16 @@ closeKeyBtn.MouseButton1Click:Connect(function()
 	keyGui:Destroy()
 end)
 
--- Discord label
 local discordLabel = Instance.new("TextLabel", card)
-discordLabel.Size                 = UDim2.new(1, -40, 0, 20)
-discordLabel.Position             = UDim2.new(0, 20, 0, 228)
+discordLabel.Size                   = UDim2.new(1, -40, 0, 20)
+discordLabel.Position               = UDim2.new(0, 20, 0, 228)
 discordLabel.BackgroundTransparency = 1
-discordLabel.Text                 = "🔗 Beli key: discord.gg/c7JtbZpyDQ"
-discordLabel.TextColor3           = Color3.fromRGB(100, 100, 160)
-discordLabel.Font                 = Enum.Font.Gotham
-discordLabel.TextSize             = 12
-discordLabel.ZIndex               = 12
-discordLabel.TextXAlignment       = Enum.TextXAlignment.Left
+discordLabel.Text                   = "🔗 Beli key: discord.gg/c7JtbZpyDQ"
+discordLabel.TextColor3             = Color3.fromRGB(100, 100, 160)
+discordLabel.Font                   = Enum.Font.Gotham
+discordLabel.TextSize               = 12
+discordLabel.ZIndex                 = 12
+discordLabel.TextXAlignment         = Enum.TextXAlignment.Left
 
 -- =====================================================
 -- SUBMIT HANDLER
@@ -267,7 +237,7 @@ local function doSubmit()
 	local key = inputBox.Text:match("^%s*(.-)%s*$")
 
 	if key == "" then
-		statusLabel.Text      = "⚠️ Key tidak boleh kosong!"
+		statusLabel.Text       = "⚠️ Key tidak boleh kosong!"
 		statusLabel.TextColor3 = Color3.fromRGB(255, 180, 0)
 		return
 	end
@@ -280,7 +250,6 @@ local function doSubmit()
 
 	task.spawn(function()
 		local valid, msg = validateKey(key)
-
 		if valid then
 			statusLabel.Text           = msg
 			statusLabel.TextColor3     = Color3.fromRGB(0, 220, 100)
@@ -312,12 +281,9 @@ TweenService:Create(card, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingD
 }):Play()
 
 -- =====================================================
--- MAIN SCRIPT LOADER
--- Paste seluruh script GUI utama kamu di dalam sini
+-- MAIN SCRIPT
 -- =====================================================
 function loadMainScript()
-
-----// VINZOHUB GOD MODE PREMIUM 🔥
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -624,21 +590,17 @@ local function makeLabel(parent, text, h)
 end
 
 -- ===================================================
--- ================= COUNT ITEM ======================
+-- COUNT ITEM
 -- ===================================================
 local function countItem(keyword)
 	keyword = string.lower(keyword)
 	local total = 0
 	for _, v in pairs(player.Backpack:GetChildren()) do
-		if string.lower(v.Name) == keyword then
-			total += 1
-		end
+		if string.lower(v.Name) == keyword then total += 1 end
 	end
 	if player.Character then
 		for _, v in pairs(player.Character:GetChildren()) do
-			if string.lower(v.Name) == keyword then
-				total += 1
-			end
+			if string.lower(v.Name) == keyword then total += 1 end
 		end
 	end
 	return total
@@ -659,9 +621,8 @@ local function equipItem(name)
 end
 
 -- ===================================================
--- ================= SHOP TAB ========================
+-- SHOP TAB
 -- ===================================================
-
 local buyRemote = ReplicatedStorage:WaitForChild("RemoteEvents"):WaitForChild("StorePurchase")
 local buyAmount = 5
 
@@ -711,9 +672,7 @@ end
 
 buyKnob.MouseButton1Down:Connect(function() draggingBuy = true end)
 UserInputService.InputEnded:Connect(function(inp)
-	if inp.UserInputType == Enum.UserInputType.MouseButton1 then
-		draggingBuy = false
-	end
+	if inp.UserInputType == Enum.UserInputType.MouseButton1 then draggingBuy = false end
 end)
 RunService.Heartbeat:Connect(function()
 	if draggingBuy then
@@ -763,14 +722,12 @@ autoBuyBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
--- ---- INTERACT ----
 local function doInteract(dur)
 	VIM:SendKeyEvent(true,"E",false,game)
 	task.wait(dur or 0.6)
 	VIM:SendKeyEvent(false,"E",false,game)
 end
 
--- ---- AUTO SELL ----
 local autoSellBtn = btn(shopTab, "🛒 AUTO SELL : OFF")
 local sellStatusLabel = makeLabel(shopTab, "Auto Sell: idle")
 
@@ -779,33 +736,22 @@ local function autoSellLoop()
 		local char = player.Character
 		if not char then task.wait(1) continue end
 		local hasItem = false
-
 		local tools = {}
-		for _, t in ipairs(player.Backpack:GetChildren()) do
-			table.insert(tools, t)
-		end
+		for _, t in ipairs(player.Backpack:GetChildren()) do table.insert(tools, t) end
 		for _, t in ipairs(char:GetChildren()) do
-			if t:IsA("Tool") then
-				table.insert(tools, t)
-			end
+			if t:IsA("Tool") then table.insert(tools, t) end
 		end
-
 		for _, tool in ipairs(tools) do
 			if not getgenv().AUTO_SELL then break end
 			if not tool or not tool.Parent then continue end
 			if not tool:IsA("Tool") then continue end
-
 			local nameLower = string.lower(tool.Name)
 			local isMarshmallow = nameLower:find("marshmallow") or nameLower:find("marsh")
-
 			if isMarshmallow then
 				local sm = countItem("small marshmallow")
 				local md = countItem("medium marshmallow")
 				local lg = countItem("large marshmallow")
-				sellStatusLabel.Text = string.format(
-					"🛒 Jual: %s | S:%d M:%d L:%d",
-					tool.Name, sm, md, lg
-				)
+				sellStatusLabel.Text = string.format("🛒 Jual: %s | S:%d M:%d L:%d", tool.Name, sm, md, lg)
 				if tool.Parent == player.Backpack then
 					tool.Parent = char
 					task.wait(0.5)
@@ -815,15 +761,11 @@ local function autoSellLoop()
 				hasItem = true
 			end
 		end
-
 		if not hasItem then
 			local sm = countItem("small marshmallow")
 			local md = countItem("medium marshmallow")
 			local lg = countItem("large marshmallow")
-			sellStatusLabel.Text = string.format(
-				"⏳ Nunggu marshmallow... | S:%d M:%d L:%d",
-				sm, md, lg
-			)
+			sellStatusLabel.Text = string.format("⏳ Nunggu marshmallow... | S:%d M:%d L:%d", sm, md, lg)
 			task.wait(2)
 		end
 	end
@@ -848,9 +790,8 @@ autoSellBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ===================================================
--- ================= FEATURES TAB ====================
+-- FEATURES TAB
 -- ===================================================
-
 local backpack = player:WaitForChild("Backpack")
 
 local startBtn    = btn(featureTab, "▶ START AutoFarm")
@@ -875,35 +816,61 @@ local function stopPromptScan()
 	scannedPrompts = {}
 end
 
+-- FIX: fungsi getPromptPosition yang bisa detect CookingPot dll
+local function getPromptPosition(prompt)
+	local p = prompt.Parent
+	if not p then return nil end
+	if p:IsA("BasePart") then return p.Position end
+	if p:IsA("Attachment") then return p.WorldPosition end
+	if p:IsA("Model") then
+		if p.PrimaryPart then return p.PrimaryPart.Position end
+		for _, child in ipairs(p:GetDescendants()) do
+			if child:IsA("BasePart") then return child.Position end
+		end
+	end
+	local grandParent = p.Parent
+	if grandParent then
+		if grandParent:IsA("BasePart") then return grandParent.Position end
+		if grandParent:IsA("Model") then
+			if grandParent.PrimaryPart then return grandParent.PrimaryPart.Position end
+			for _, child in ipairs(grandParent:GetDescendants()) do
+				if child:IsA("BasePart") then return child.Position end
+			end
+		end
+	end
+	return nil
+end
+
+-- FIX: doPromptScan pakai getPromptPosition
 local function doPromptScan(statusLbl, countLbl)
 	local char = player.Character
 	local hrp = char and char:FindFirstChild("HumanoidRootPart")
 	if not hrp then return end
 	scannedPrompts = {}
 	local found = 0
-	for _,v in ipairs(workspace:GetDescendants()) do
+	for _, v in ipairs(workspace:GetDescendants()) do
 		if v:IsA("ProximityPrompt") then
-			local pos = v.Parent:IsA("BasePart") and v.Parent.Position or nil
+			local pos = getPromptPosition(v)
 			if pos then
 				local dist = (hrp.Position - pos).Magnitude
 				if dist <= SCAN_RADIUS then
 					scannedPrompts[v] = {
-						maxDist = v.MaxActivationDistance,
-						lineOfSight = v.RequiresLineOfSight,
-						enabled = v.Enabled,
+						maxDist      = v.MaxActivationDistance,
+						lineOfSight  = v.RequiresLineOfSight,
+						enabled      = v.Enabled,
 						holdDuration = v.HoldDuration
 					}
-					v.Enabled = true
+					v.Enabled               = true
 					v.MaxActivationDistance = 20
-					v.RequiresLineOfSight = false
-					v.HoldDuration = 0
+					v.RequiresLineOfSight   = false
+					v.HoldDuration          = 0
 					found += 1
 				end
 			end
 		end
 	end
-	countLbl.Text = "📊 "..found.." prompt"
-	statusLbl.Text = "✅ Scan: "..found
+	countLbl.Text  = "📊 " .. found .. " prompt"
+	statusLbl.Text = "✅ Scan: " .. found
 end
 
 local promptScanBtn     = btn(featureTab, "👁️ PROMPT SCANNER : OFF")
@@ -927,17 +894,12 @@ promptScanBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ===================================================
--- ================= TURUN JALAN =====================
+-- TURUN JALAN
 -- ===================================================
-
 local lowerRoadBtn    = btn(featureTab, "🛣️ TURUNKAN JALAN : OFF")
 local lowerRoadStatus = makeLabel(featureTab, "Status: idle")
 
-local ROAD_KEYWORDS = {
-	"road","street","sidewalk","pavement","asphalt",
-	"ground","floor","path","lane","crossing",
-	"jalan","trotoar","jalanan"
-}
+local ROAD_KEYWORDS = {"road","street","sidewalk","pavement","asphalt","ground","floor","path","lane","crossing","jalan","trotoar","jalanan"}
 local originalPositions = {}
 local currentRoadOffset = 0
 
@@ -1071,9 +1033,8 @@ lowerRoadBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ===================================================
--- ================= INVENTORY DISPLAY ===============
+-- INVENTORY DISPLAY
 -- ===================================================
-
 local invWaterLabel   = makeLabel(featureTab, "💧 Water            : -")
 local invSugarLabel   = makeLabel(featureTab, "🍬 Sugar Block Bag : -")
 local invGelatinLabel = makeLabel(featureTab, "🟡 Gelatin         : -")
@@ -1119,9 +1080,8 @@ task.spawn(function()
 end)
 
 -- ===================================================
--- ================= AUTOFARM ========================
+-- AUTOFARM
 -- ===================================================
-
 local farming = false
 
 local function farmWait(seconds)
@@ -1158,31 +1118,21 @@ local function autoFarm()
 			continue
 		end
 		statusLabel.Text = "💧 Masukkan Water..."
-		equipItem("water")
-		task.wait(0.5)
-		doInteract(0.2)
+		equipItem("water") task.wait(0.5) doInteract(0.2)
 		if not farming then break end
 		statusLabel.Text = "⏳ Tunggu 20 detik..."
 		if not farmWait(20) then break end
-		if not farming then break end
 		statusLabel.Text = "🍬 Masukkan Sugar Block Bag..."
-		equipItem("sugar block bag")
-		task.wait(0.5)
-		doInteract(0.2)
+		equipItem("sugar block bag") task.wait(0.5) doInteract(0.2)
 		if not farming then break end
 		task.wait(1)
 		statusLabel.Text = "🟡 Masukkan Gelatin..."
-		equipItem("gelatin")
-		task.wait(0.5)
-		doInteract(0.2)
+		equipItem("gelatin") task.wait(0.5) doInteract(0.2)
 		if not farming then break end
 		statusLabel.Text = "⏳ Memasak 45 detik..."
 		if not farmWait(45) then break end
-		if not farming then break end
 		statusLabel.Text = "🍡 Ambil Marshmallow..."
-		equipItem("empty bag")
-		task.wait(0.5)
-		doInteract(0.2)
+		equipItem("empty bag") task.wait(0.5) doInteract(0.2)
 		task.wait(2)
 		statusLabel.Text = "✅ Siklus selesai! Lanjut..."
 		if not farmWait(1) then break end
@@ -1197,16 +1147,14 @@ startBtn.MouseButton1Click:Connect(function()
 	statusLabel.Text = "▶ Macro: Running"
 	task.spawn(autoFarm)
 end)
-
 stopBtn.MouseButton1Click:Connect(function()
 	farming = false
 	statusLabel.Text = "⏹ Macro: Stopped"
 end)
 
 -- ===================================================
--- ================= POTATO TAB ======================
+-- POTATO TAB
 -- ===================================================
-
 local potatoFarming = false
 
 local POTATO_STEPS = {
@@ -1286,11 +1234,7 @@ local function equipItemPotato(name)
 	local char = player.Character
 	if not char then return false end
 	local item = findItemPotato(name)
-	if item then
-		item.Parent = char
-		task.wait(0.4)
-		return true
-	end
+	if item then item.Parent = char task.wait(0.4) return true end
 	return false
 end
 
@@ -1326,10 +1270,6 @@ end)
 backpack.ChildAdded:Connect(function()   task.wait(0.3) refreshPotatoDisplay() end)
 backpack.ChildRemoved:Connect(function() task.wait(0.1) refreshPotatoDisplay() end)
 
--- ===================================================
--- ====== TELEPORT CEPAT - POTATO TAB ================
--- ===================================================
-
 local potatoTPSeparator = makeLabel(potatoTab, "──── 📍 TELEPORT CEPAT ────")
 potatoTPSeparator.TextColor3 = Color3.fromRGB(255, 200, 0)
 potatoTPSeparator.BackgroundColor3 = Color3.fromRGB(40, 10, 60)
@@ -1346,29 +1286,16 @@ tpPotatoBahanBtn.BackgroundColor3  = Color3.fromRGB(0, 100, 180)
 tpPotatoPabrikBtn.BackgroundColor3 = Color3.fromRGB(0, 130, 60)
 tpPotatoNPCBtn.BackgroundColor3    = Color3.fromRGB(160, 80, 0)
 
-tpPotatoBahanBtn.MouseEnter:Connect(function()
-	TweenService:Create(tpPotatoBahanBtn,TweenInfo.new(0.15),{BackgroundColor3=Color3.fromRGB(0,150,255)}):Play()
-end)
-tpPotatoBahanBtn.MouseLeave:Connect(function()
-	TweenService:Create(tpPotatoBahanBtn,TweenInfo.new(0.15),{BackgroundColor3=Color3.fromRGB(0,100,180)}):Play()
-end)
-tpPotatoPabrikBtn.MouseEnter:Connect(function()
-	TweenService:Create(tpPotatoPabrikBtn,TweenInfo.new(0.15),{BackgroundColor3=Color3.fromRGB(0,200,90)}):Play()
-end)
-tpPotatoPabrikBtn.MouseLeave:Connect(function()
-	TweenService:Create(tpPotatoPabrikBtn,TweenInfo.new(0.15),{BackgroundColor3=Color3.fromRGB(0,130,60)}):Play()
-end)
-tpPotatoNPCBtn.MouseEnter:Connect(function()
-	TweenService:Create(tpPotatoNPCBtn,TweenInfo.new(0.15),{BackgroundColor3=Color3.fromRGB(220,120,0)}):Play()
-end)
-tpPotatoNPCBtn.MouseLeave:Connect(function()
-	TweenService:Create(tpPotatoNPCBtn,TweenInfo.new(0.15),{BackgroundColor3=Color3.fromRGB(160,80,0)}):Play()
-end)
+tpPotatoBahanBtn.MouseEnter:Connect(function() TweenService:Create(tpPotatoBahanBtn,TweenInfo.new(0.15),{BackgroundColor3=Color3.fromRGB(0,150,255)}):Play() end)
+tpPotatoBahanBtn.MouseLeave:Connect(function() TweenService:Create(tpPotatoBahanBtn,TweenInfo.new(0.15),{BackgroundColor3=Color3.fromRGB(0,100,180)}):Play() end)
+tpPotatoPabrikBtn.MouseEnter:Connect(function() TweenService:Create(tpPotatoPabrikBtn,TweenInfo.new(0.15),{BackgroundColor3=Color3.fromRGB(0,200,90)}):Play() end)
+tpPotatoPabrikBtn.MouseLeave:Connect(function() TweenService:Create(tpPotatoPabrikBtn,TweenInfo.new(0.15),{BackgroundColor3=Color3.fromRGB(0,130,60)}):Play() end)
+tpPotatoNPCBtn.MouseEnter:Connect(function() TweenService:Create(tpPotatoNPCBtn,TweenInfo.new(0.15),{BackgroundColor3=Color3.fromRGB(220,120,0)}):Play() end)
+tpPotatoNPCBtn.MouseLeave:Connect(function() TweenService:Create(tpPotatoNPCBtn,TweenInfo.new(0.15),{BackgroundColor3=Color3.fromRGB(160,80,0)}):Play() end)
 
 -- ===================================================
--- ================= TELEPORT FUNCTION ===============
+-- TELEPORT FUNCTION
 -- ===================================================
-
 local teleporting = false
 local tpCooldown  = {}
 
@@ -1386,10 +1313,7 @@ local function teleportVehiclePro(targetPos)
 	if teleporting then return end
 	teleporting = true
 	local btnKey = tostring(targetPos)
-	if tpCooldown[btnKey] and tick() - tpCooldown[btnKey] < 0.3 then
-		teleporting = false
-		return
-	end
+	if tpCooldown[btnKey] and tick() - tpCooldown[btnKey] < 0.3 then teleporting = false return end
 	tpCooldown[btnKey] = tick()
 	task.spawn(function()
 		local char = player.Character or player.CharacterAdded:Wait()
@@ -1409,9 +1333,7 @@ local function teleportVehiclePro(targetPos)
 						if v:IsA("BasePart") then vehicle.PrimaryPart = v break end
 					end
 				end
-				if vehicle.PrimaryPart then
-					vehicle:SetPrimaryPartCFrame(CFrame.new(targetPos))
-				end
+				if vehicle.PrimaryPart then vehicle:SetPrimaryPartCFrame(CFrame.new(targetPos)) end
 			end
 		else
 			hrp.CFrame = CFrame.new(targetPos)
@@ -1436,9 +1358,8 @@ tpPotatoPabrikBtn.MouseButton1Click:Connect(function() teleportVehiclePro(TP_POT
 tpPotatoNPCBtn.MouseButton1Click:Connect(function()    teleportVehiclePro(TP_POTATO_NPC)    end)
 
 -- ===================================================
--- ====== 12 NPC TELEPORT BUTTONS ====================
+-- NPC TELEPORT
 -- ===================================================
-
 local npcSeparator = makeLabel(potatoTab, "──── 🧍 NPC LOCATIONS ────")
 npcSeparator.TextColor3 = Color3.fromRGB(255, 140, 0)
 npcSeparator.BackgroundColor3 = Color3.fromRGB(30, 15, 0)
@@ -1459,12 +1380,12 @@ local NPC_COORDS = {
 }
 
 local npcColors = {
-	Color3.fromRGB(0,100,180),  Color3.fromRGB(0,130,60),
-	Color3.fromRGB(160,80,0),   Color3.fromRGB(120,0,160),
-	Color3.fromRGB(0,120,120),  Color3.fromRGB(160,30,30),
-	Color3.fromRGB(0,100,180),  Color3.fromRGB(0,130,60),
-	Color3.fromRGB(160,80,0),   Color3.fromRGB(120,0,160),
-	Color3.fromRGB(0,120,120),  Color3.fromRGB(160,30,30),
+	Color3.fromRGB(0,100,180), Color3.fromRGB(0,130,60),
+	Color3.fromRGB(160,80,0),  Color3.fromRGB(120,0,160),
+	Color3.fromRGB(0,120,120), Color3.fromRGB(160,30,30),
+	Color3.fromRGB(0,100,180), Color3.fromRGB(0,130,60),
+	Color3.fromRGB(160,80,0),  Color3.fromRGB(120,0,160),
+	Color3.fromRGB(0,120,120), Color3.fromRGB(160,30,30),
 }
 
 for i, npc in ipairs(NPC_COORDS) do
@@ -1472,13 +1393,7 @@ for i, npc in ipairs(NPC_COORDS) do
 	local baseCol = npcColors[i]
 	b.BackgroundColor3 = baseCol
 	b.MouseEnter:Connect(function()
-		TweenService:Create(b, TweenInfo.new(0.15), {
-			BackgroundColor3 = Color3.fromRGB(
-				math.min(baseCol.R*255+50,255),
-				math.min(baseCol.G*255+50,255),
-				math.min(baseCol.B*255+50,255)
-			)
-		}):Play()
+		TweenService:Create(b, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(math.min(baseCol.R*255+50,255),math.min(baseCol.G*255+50,255),math.min(baseCol.B*255+50,255))}):Play()
 	end)
 	b.MouseLeave:Connect(function()
 		TweenService:Create(b, TweenInfo.new(0.15), {BackgroundColor3=baseCol}):Play()
@@ -1488,9 +1403,8 @@ for i, npc in ipairs(NPC_COORDS) do
 end
 
 -- ===================================================
--- ================= MOVE TO POS =====================
+-- MOVE TO POS
 -- ===================================================
-
 local function moveToPos(targetPos)
 	local char = player.Character
 	if not char then return false end
@@ -1545,9 +1459,8 @@ local function moveToPos(targetPos)
 end
 
 -- ===================================================
--- ================= POTATO LOOP =====================
+-- POTATO LOOP
 -- ===================================================
-
 local potatoLoopCount = 0
 
 local function autoPotatoLoop()
@@ -1616,7 +1529,6 @@ potatoStartBtn.MouseButton1Click:Connect(function()
 	potatoStatus.Text = "▶ Running..."
 	task.spawn(autoPotatoLoop)
 end)
-
 potatoStopBtn.MouseButton1Click:Connect(function()
 	potatoFarming = false
 	potatoStartBtn.BackgroundColor3 = Color3.fromRGB(80,0,180)
@@ -1625,9 +1537,8 @@ potatoStopBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ===================================================
--- ================= RESPAWN TAB =====================
+-- RESPAWN TAB
 -- ===================================================
-
 local selectedSpawn = nil
 local respawnStatus = makeLabel(respawnTab, "📍 Spawn: belum dipilih")
 
@@ -1674,42 +1585,28 @@ respawnNowBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ===================================================
--- ================= TELEPORT TAB ====================
+-- TELEPORT TAB
 -- ===================================================
-
-local TARGET_DEALER = Vector3.new(511,3,601)
-local TP_RS1        = Vector3.new(1140.8,10.1,451.8)
-local TP_RS2        = Vector3.new(1141.2,10.1,423.2)
-local TP_TIER1      = Vector3.new(985.9,10.1,247)
-local TP_TIER2      = Vector3.new(989.3,11.0,228.3)
-local TP_TRASH1     = Vector3.new(890.9,10.1,44.3)
-local TP_TRASH2     = Vector3.new(920.4,10.1,46.3)
-local TP_Ujung      = Vector3.new(-467.1,4.8,353.5)
-local TP_MID        = Vector3.new(218.7,3.7,-176.2)
-local TP_DEALERSHIP = Vector3.new(733.5,4.6,431.9)
-
-btn(tpTab,"🚀 Dealer").MouseButton1Click:Connect(function()     teleportVehiclePro(TARGET_DEALER) end)
-btn(tpTab,"🏥 RS 1").MouseButton1Click:Connect(function()        teleportVehiclePro(TP_RS1)        end)
-btn(tpTab,"🏥 RS 2").MouseButton1Click:Connect(function()        teleportVehiclePro(TP_RS2)        end)
-btn(tpTab,"🏠 Tier 1").MouseButton1Click:Connect(function()      teleportVehiclePro(TP_TIER1)      end)
-btn(tpTab,"🏠 Tier 2").MouseButton1Click:Connect(function()      teleportVehiclePro(TP_TIER2)      end)
-btn(tpTab,"🗑️ Trash 1").MouseButton1Click:Connect(function()     teleportVehiclePro(TP_TRASH1)     end)
-btn(tpTab,"🗑️ Trash 2").MouseButton1Click:Connect(function()     teleportVehiclePro(TP_TRASH2)     end)
-btn(tpTab,"🚗 Dealership").MouseButton1Click:Connect(function()  teleportVehiclePro(TP_DEALERSHIP) end)
-btn(tpTab,"🔫 GS Ujung").MouseButton1Click:Connect(function()    teleportVehiclePro(TP_Ujung)      end)
-btn(tpTab,"🔫 GS Mid").MouseButton1Click:Connect(function()      teleportVehiclePro(TP_MID)        end)
+btn(tpTab,"🚀 Dealer").MouseButton1Click:Connect(function()     teleportVehiclePro(Vector3.new(511,3,601))          end)
+btn(tpTab,"🏥 RS 1").MouseButton1Click:Connect(function()        teleportVehiclePro(Vector3.new(1140.8,10.1,451.8)) end)
+btn(tpTab,"🏥 RS 2").MouseButton1Click:Connect(function()        teleportVehiclePro(Vector3.new(1141.2,10.1,423.2)) end)
+btn(tpTab,"🏠 Tier 1").MouseButton1Click:Connect(function()      teleportVehiclePro(Vector3.new(985.9,10.1,247))    end)
+btn(tpTab,"🏠 Tier 2").MouseButton1Click:Connect(function()      teleportVehiclePro(Vector3.new(989.3,11.0,228.3))  end)
+btn(tpTab,"🗑️ Trash 1").MouseButton1Click:Connect(function()     teleportVehiclePro(Vector3.new(890.9,10.1,44.3))   end)
+btn(tpTab,"🗑️ Trash 2").MouseButton1Click:Connect(function()     teleportVehiclePro(Vector3.new(920.4,10.1,46.3))   end)
+btn(tpTab,"🚗 Dealership").MouseButton1Click:Connect(function()  teleportVehiclePro(Vector3.new(733.5,4.6,431.9))   end)
+btn(tpTab,"🔫 GS Ujung").MouseButton1Click:Connect(function()    teleportVehiclePro(Vector3.new(-467.1,4.8,353.5))  end)
+btn(tpTab,"🔫 GS Mid").MouseButton1Click:Connect(function()      teleportVehiclePro(Vector3.new(218.7,3.7,-176.2))  end)
 
 -- ===================================================
--- ================= VISUAL TAB ======================
+-- VISUAL TAB
 -- ===================================================
-
 local ESP_FOLDER = Instance.new("Folder")
-ESP_FOLDER.Name  = "ESP_STORAGE"
+ESP_FOLDER.Name   = "ESP_STORAGE"
 ESP_FOLDER.Parent = game.CoreGui
 
 local espConnections = {}
 
--- ---- ESP NAME ----
 local espNameBtn = btn(visualTab, "👁️ ESP NAME : OFF")
 getgenv().ESP_NAME = false
 
@@ -1769,7 +1666,6 @@ espNameBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
--- ---- ESP HEALTH BAR ----
 local espHealthBtn = btn(visualTab, "❤️ ESP HEALTH BAR : OFF")
 getgenv().ESP_HEALTH = false
 
@@ -1850,7 +1746,6 @@ espHealthBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
--- ---- ESP SKELETON ----
 local espSkelBtn = btn(visualTab, "🦴 ESP SKELETON : OFF")
 getgenv().ESP_SKELETON = false
 
@@ -2002,9 +1897,8 @@ Players.PlayerRemoving:Connect(function(plr)
 end)
 
 -- ===================================================
--- ====== ANTI HIT + ANTI APPROACH ===================
+-- ANTI HIT + ANTI APPROACH
 -- ===================================================
-
 local antiHitBtn    = btn(visualTab, "🛡️ ANTI HIT + APPROACH : OFF")
 local antiHitStatus = makeLabel(visualTab, "Status: idle")
 local antiHitConn   = nil
@@ -2041,64 +1935,40 @@ local function startAntiApproach()
 		local hrp  = char and char:FindFirstChild("HumanoidRootPart")
 		if not hrp then return end
 		if tick() - antiHitLastTP < 1 then return end
-
 		local closest     = nil
 		local closestDist = math.huge
-
 		for _, plr in pairs(Players:GetPlayers()) do
 			if plr == player then continue end
 			local c = plr.Character
 			local h = c and c:FindFirstChild("HumanoidRootPart")
 			if not h then continue end
-
 			local dist = (hrp.Position - h.Position).Magnitude
 			if dist > APPROACH_RADIUS then continue end
 			if dist >= closestDist then continue end
-
-			-- Raycast cek 3 titik: tengah, kepala, kaki
 			local origin = hrp.Position
 			local target = h.Position
 			local rayParams = RaycastParams.new()
 			rayParams.FilterType = Enum.RaycastFilterType.Exclude
 			rayParams.FilterDescendantsInstances = {char, c}
-
-			local checkPoints = {
-				origin,
-				origin + Vector3.new(0, 1.5, 0),
-				origin + Vector3.new(0, -1.5, 0),
-			}
-			local targetPoints = {
-				target,
-				target + Vector3.new(0, 1.5, 0),
-				target + Vector3.new(0, -1.5, 0),
-			}
-
+			local checkPoints  = {origin, origin + Vector3.new(0,1.5,0), origin + Vector3.new(0,-1.5,0)}
+			local targetPoints = {target, target + Vector3.new(0,1.5,0), target + Vector3.new(0,-1.5,0)}
 			local clearCount = 0
 			for i = 1, 3 do
-				local dir      = targetPoints[i] - checkPoints[i]
-				local rayDist  = dir.Magnitude
-				local result   = workspace:Raycast(checkPoints[i], dir, rayParams)
+				local dir     = targetPoints[i] - checkPoints[i]
+				local rayDist = dir.Magnitude
+				local result  = workspace:Raycast(checkPoints[i], dir, rayParams)
 				if result then
-					local hitDist = (result.Position - checkPoints[i]).Magnitude
-					if hitDist >= rayDist - 1 then
-						clearCount += 1
-					end
+					if (result.Position - checkPoints[i]).Magnitude >= rayDist - 1 then clearCount += 1 end
 				else
 					clearCount += 1
 				end
 			end
-
-			-- minimal 1 ray clear = player terlihat = hitung sebagai ancaman
-			if clearCount > 0 then
-				closestDist = dist
-				closest     = plr
-			end
+			if clearCount > 0 then closestDist = dist closest = plr end
 		end
-
 		if closest then
 			if not approachDetected then
-				approachDetected  = true
-				antiHitLastTP     = tick()
+				approachDetected   = true
+				antiHitLastTP      = tick()
 				antiHitStatus.Text = "⚠️ " .. closest.Name .. " (jarak: " .. math.floor(closestDist) .. ") TP mall..."
 				teleporting = false
 				teleportVehiclePro(MALL_POS)
@@ -2141,9 +2011,8 @@ antiHitBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ===================================================
--- ================= DELETE OBJECT ===================
+-- DELETE OBJECT
 -- ===================================================
-
 local deleteObjectBtn  = btn(visualTab, "🗑️ DELETE OBJECT : OFF")
 getgenv().DELETE_MODE  = false
 local deleteHistory    = {}
@@ -2165,7 +2034,6 @@ deleteObjectBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
-local mouse      = player:GetMouse()
 local altPressed = false
 
 UserInputService.InputBegan:Connect(function(input)
@@ -2186,9 +2054,7 @@ UserInputService.InputBegan:Connect(function(input, gp)
 			local backup = table.remove(deleteHistory, 1)
 			pcall(function()
 				backup.clone.Parent = backup.originalParent
-				if backup.clone:IsA("BasePart") then
-					backup.clone.CFrame = backup.originalCFrame
-				end
+				if backup.clone:IsA("BasePart") then backup.clone.CFrame = backup.originalCFrame end
 			end)
 		end
 	end
@@ -2222,10 +2088,7 @@ RunService.Heartbeat:Connect(function()
 	local result = workspace:Raycast(ray.Origin, ray.Direction * 500, params)
 	if result and result.Instance and result.Instance:IsA("BasePart") then
 		local hit = result.Instance
-		if currentTarget ~= hit then
-			currentTarget = hit
-			createOutline(hit)
-		end
+		if currentTarget ~= hit then currentTarget = hit createOutline(hit) end
 	else
 		if currentHighlight then currentHighlight:Destroy() currentHighlight = nil end
 		currentTarget = nil
@@ -2275,9 +2138,8 @@ task.spawn(function()
 end)
 
 -- ===================================================
--- ================= CREDIT TAB ======================
+-- CREDIT TAB
 -- ===================================================
-
 local creditTitle = Instance.new("TextLabel", creditTab)
 creditTitle.Size = UDim2.new(1,0,0,50)
 creditTitle.BackgroundColor3 = Color3.fromRGB(120,0,255)
@@ -2318,9 +2180,8 @@ discordBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ===================================================
--- ================= CLEANUP =========================
+-- CLEANUP
 -- ===================================================
-
 local function stopAutoRespawn() end
 
 closeBtn.Activated:Connect(function()
@@ -2345,6 +2206,6 @@ closeBtn.Activated:Connect(function()
 	pcall(clearESPSkeleton)
 	pcall(function() skelGui:Destroy() end)
 	if gui then gui:Destroy() end
-end)--
+end)
 
-end
+end -- end loadMainScript
