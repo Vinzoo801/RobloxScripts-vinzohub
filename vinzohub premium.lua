@@ -1,8 +1,14 @@
 -- =====================================================
--- VINZOHUB KEY SYSTEM - FULL SYNC VERSION
+-- VINZOHUB KEY SYSTEM - FINAL COMPLETE
+-- Validasi key langsung ke bot via HTTP
+-- Tidak perlu webhook, tidak perlu Allow HTTP di Studio
 -- =====================================================
 
-local WEBHOOK_LOG = "https://discord.com/api/webhooks/1487782597009477663/Ml2kijtlJR_JTlhRIy9ReXEx5vZBdVfKbKK4p0pbJe6fI_vlS61_ZYBzSu8tMWc6kjHG"
+-- =====================================================
+-- CONFIG - GANTI INI
+-- =====================================================
+local BOT_URL    = "http://play.galaxyhost.biz.id:62212"  -- URL bot kamu
+local HTTP_SECRET = "vinzox123"         -- sama dengan CONFIG.HTTP_SECRET di bot.js
 
 -- =====================================================
 -- SERVICES
@@ -16,7 +22,7 @@ local RunService       = game:GetService("RunService")
 local player    = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- Support semua executor (Delta, Synapse, dll)
+-- Support semua executor
 if not getgenv then
 	getgenv = function() return _G end
 end
@@ -28,17 +34,46 @@ for _, v in pairs(playerGui:GetChildren()) do
 end
 
 -- =====================================================
--- KEY DATABASE
+-- VALIDATE KEY - kirim ke bot langsung
+-- Bot yang handle validasi, lock, dan log
+-- =====================================================
+local function validateKey(key)
+	key = key:match("^%s*(.-)%s*$"):upper()
+
+	local ok, result = pcall(function()
+		local response = HttpService:RequestAsync({
+			Url    = BOT_URL .. "/validate",
+			Method = "POST",
+			Headers = {
+				["Content-Type"] = "application/json",
+				["x-secret"]     = HTTP_SECRET
+			},
+			Body = HttpService:JSONEncode({
+				key      = key,
+				username = player.Name,
+				userId   = tostring(player.UserId)
+			})
+		})
+		return HttpService:JSONDecode(response.Body)
+	end)
+
+	if not ok then
+		-- Kalau HTTP gagal, fallback ke KEY_DATABASE lokal
+		return validateKeyLocal(key)
+	end
+
+	return result.valid, result.message
+end
+
+-- =====================================================
+-- FALLBACK - KEY DATABASE LOKAL
+-- Dipakai kalau HTTP ke bot tidak bisa
 -- Bot Discord otomatis tambah key di sini via GitHub
 -- =====================================================
 local KEY_DATABASE = {
 	-- key akan otomatis ditambah oleh bot Discord
-	["VNZ-19B4328F65A2409B"] = { expired = "02/04/2026", lockedUser = nil },
 }
 
--- =====================================================
--- CEK EXPIRED (berdasarkan tanggal, bukan os.time)
--- =====================================================
 local function isExpired(expiredStr)
 	if not expiredStr then return false end
 	local day   = tonumber(expiredStr:sub(1,2))
@@ -54,103 +89,19 @@ local function isExpired(expiredStr)
 	return false
 end
 
--- =====================================================
--- KIRIM LOG KE DISCORD WEBHOOK
--- Bot Discord baca channel ini -> update keys.json
--- =====================================================
-local function sendWebhook(title, description, color)
-	task.spawn(function()
-		pcall(function()
-			HttpService:RequestAsync({
-				Url    = WEBHOOK_LOG,
-				Method = "POST",
-				Headers = { ["Content-Type"] = "application/json" },
-				Body   = HttpService:JSONEncode({
-					embeds = {{
-						title       = title,
-						description = description,
-						color       = color,
-						footer      = { text = "VINZOHUB Key System" },
-						timestamp   = os.date("!%Y-%m-%dT%H:%M:%SZ")
-					}}
-				})
-			})
-		end)
-	end)
-end
-
--- =====================================================
--- VALIDATE KEY
--- =====================================================
-local function validateKey(key)
-	-- Trim spasi + uppercase biar ga case sensitive
-	key = key:match("^%s*(.-)%s*$"):upper()
-
+function validateKeyLocal(key)
 	local record = KEY_DATABASE[key]
-
-	-- Key tidak ada di database
 	if not record then
-		sendWebhook(
-			"❌ Key Salah",
-			"**Key:** `" .. key .. "`\n" ..
-			"**User:** " .. player.Name .. " (" .. tostring(player.UserId) .. ")\n" ..
-			"**Status:** Key tidak ditemukan",
-			16711680 -- merah
-		)
 		return false, "❌ Key tidak ditemukan!"
 	end
-
-	-- Cek expired
 	if isExpired(record.expired) then
-		sendWebhook(
-			"⏰ Key Expired",
-			"**Key:** `" .. key .. "`\n" ..
-			"**User:** " .. player.Name .. " (" .. tostring(player.UserId) .. ")\n" ..
-			"**Expired:** " .. (record.expired or "-"),
-			16744272 -- orange
-		)
 		return false, "❌ Key sudah expired! (" .. (record.expired or "-") .. ")"
 	end
-
-	-- Cek locked - key sudah dipakai orang lain
 	if record.lockedUser and record.lockedUser ~= player.Name then
-		sendWebhook(
-			"🔒 Key Dicoba User Lain",
-			"**Key:** `" .. key .. "`\n" ..
-			"**Dicoba oleh:** " .. player.Name .. " (" .. tostring(player.UserId) .. ")\n" ..
-			"**Key milik:** " .. record.lockedUser,
-			16711680 -- merah
-		)
 		return false, "❌ Key sudah dipakai oleh " .. record.lockedUser .. "!"
 	end
-
-	-- Pertama kali pakai -> lock ke user ini
-	local isFirstUse = not record.lockedUser
 	KEY_DATABASE[key].lockedUser = player.Name
-
 	local expStr = record.expired or "Permanent"
-
-	-- Kirim log ke Discord (bot akan baca ini dan update keys.json)
-	if isFirstUse then
-		sendWebhook(
-			"🔑 Key Pertama Kali Digunakan!",
-			"**Key:** `" .. key .. "`\n" ..
-			"**User:** " .. player.Name .. " (" .. tostring(player.UserId) .. ")\n" ..
-			"**Expired:** " .. expStr .. "\n" ..
-			"**Status:** 🆕 Key di-lock ke user ini",
-			16753920 -- kuning
-		)
-	else
-		sendWebhook(
-			"✅ Key Valid - Re-login",
-			"**Key:** `" .. key .. "`\n" ..
-			"**User:** " .. player.Name .. " (" .. tostring(player.UserId) .. ")\n" ..
-			"**Expired:** " .. expStr .. "\n" ..
-			"**Status:** 🔄 Re-login",
-			65280 -- hijau
-		)
-	end
-
 	return true, "✅ Welcome " .. player.Name .. "! Exp: " .. expStr
 end
 
@@ -355,7 +306,7 @@ TweenService:Create(card, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingD
 
 -- =====================================================
 -- MAIN SCRIPT LOADER
--- Paste script utama kamu di dalam function ini
+-- Paste script utama kamu di dalam sini
 -- =====================================================
 function loadMainScript()
 
@@ -2387,6 +2338,6 @@ closeBtn.Activated:Connect(function()
 	pcall(clearESPSkeleton)
 	pcall(function() skelGui:Destroy() end)
 	if gui then gui:Destroy() end
-end) --
+end)--
 
 end
