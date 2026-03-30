@@ -72,6 +72,7 @@ end
 -- =====================================================
 local KEY_DATABASE = {
 	-- key akan otomatis ditambah oleh bot Discord
+	["VNZ-4D294132F7C64DAD"] = { expired = "02/04/2026", lockedUser = nil },
 }
 
 local function isExpired(expiredStr)
