@@ -1,6 +1,5 @@
 -- =====================================================
--- VINZOHUB KEY SYSTEM - FIXED VERSION
--- Fix: lock 1 player, logs sync, support semua executor
+-- VINZOHUB KEY SYSTEM - FULL SYNC VERSION
 -- =====================================================
 
 local WEBHOOK_LOG = "https://discord.com/api/webhooks/1487782597009477663/Ml2kijtlJR_JTlhRIy9ReXEx5vZBdVfKbKK4p0pbJe6fI_vlS61_ZYBzSu8tMWc6kjHG"
@@ -17,41 +16,49 @@ local RunService       = game:GetService("RunService")
 local player    = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- =====================================================
--- SUPPORT SEMUA EXECUTOR (Delta, Synapse, dll)
--- =====================================================
+-- Support semua executor (Delta, Synapse, dll)
 if not getgenv then
 	getgenv = function() return _G end
 end
 if not _G then _G = {} end
 
--- =====================================================
--- DESTROY EXISTING
--- =====================================================
+-- Destroy existing
 for _, v in pairs(playerGui:GetChildren()) do
 	if v.Name:find("VINZO") then v:Destroy() end
 end
 
 -- =====================================================
 -- KEY DATABASE
--- Format: ["KEY"] = { expired = "DD/MM/YYYY" atau nil, lockedUser = nil }
 -- Bot Discord otomatis tambah key di sini via GitHub
 -- =====================================================
 local KEY_DATABASE = {
 	-- key akan otomatis ditambah oleh bot Discord
-	["VNZ-D30A2F0CC8F34D72"] = { expired = "31/03/2026", lockedUser = nil 	["VNZ-8EEAB1492E3E4F9F"] = { expired = "02/04/2026", lockedUser = nil },
-},
 }
 
 -- =====================================================
--- VALIDATE KEY + LOCK + LOG KE DISCORD
+-- CEK EXPIRED (berdasarkan tanggal, bukan os.time)
 -- =====================================================
-local function validateKey(key)
-	local record = KEY_DATABASE[key]
+local function isExpired(expiredStr)
+	if not expiredStr then return false end
+	local day   = tonumber(expiredStr:sub(1,2))
+	local month = tonumber(expiredStr:sub(4,5))
+	local year  = tonumber(expiredStr:sub(7,10))
+	if not day or not month or not year then return false end
+	local today = os.date("*t")
+	if today.year  > year  then return true  end
+	if today.year  < year  then return false end
+	if today.month > month then return true  end
+	if today.month < month then return false end
+	if today.day   > day   then return true  end
+	return false
+end
 
-	-- Key tidak ada
-	if not record then
-		-- Log percobaan key salah
+-- =====================================================
+-- KIRIM LOG KE DISCORD WEBHOOK
+-- Bot Discord baca channel ini -> update keys.json
+-- =====================================================
+local function sendWebhook(title, description, color)
+	task.spawn(function()
 		pcall(function()
 			HttpService:RequestAsync({
 				Url    = WEBHOOK_LOG,
@@ -59,89 +66,89 @@ local function validateKey(key)
 				Headers = { ["Content-Type"] = "application/json" },
 				Body   = HttpService:JSONEncode({
 					embeds = {{
-						title       = "❌ Key Salah",
-						description = "**Key:** `" .. key .. "`\n**User:** " .. player.Name .. " (" .. tostring(player.UserId) .. ")\n**Status:** Key tidak ditemukan",
-						color       = 16711680,
+						title       = title,
+						description = description,
+						color       = color,
 						footer      = { text = "VINZOHUB Key System" },
 						timestamp   = os.date("!%Y-%m-%dT%H:%M:%SZ")
 					}}
 				})
 			})
 		end)
+	end)
+end
+
+-- =====================================================
+-- VALIDATE KEY
+-- =====================================================
+local function validateKey(key)
+	-- Trim spasi + uppercase biar ga case sensitive
+	key = key:match("^%s*(.-)%s*$"):upper()
+
+	local record = KEY_DATABASE[key]
+
+	-- Key tidak ada di database
+	if not record then
+		sendWebhook(
+			"❌ Key Salah",
+			"**Key:** `" .. key .. "`\n" ..
+			"**User:** " .. player.Name .. " (" .. tostring(player.UserId) .. ")\n" ..
+			"**Status:** Key tidak ditemukan",
+			16711680 -- merah
+		)
 		return false, "❌ Key tidak ditemukan!"
 	end
 
 	-- Cek expired
-	if record.expired then
-		local day   = tonumber(record.expired:sub(1,2))
-		local month = tonumber(record.expired:sub(4,5))
-		local year  = tonumber(record.expired:sub(7,10))
-		local expDate = os.time({year=year, month=month, day=day, hour=23, min=59, sec=59})
-		if os.time() > expDate then
-			pcall(function()
-				HttpService:RequestAsync({
-					Url    = WEBHOOK_LOG,
-					Method = "POST",
-					Headers = { ["Content-Type"] = "application/json" },
-					Body   = HttpService:JSONEncode({
-						embeds = {{
-							title       = "⏰ Key Expired",
-							description = "**Key:** `" .. key .. "`\n**User:** " .. player.Name .. "\n**Expired:** " .. record.expired,
-							color       = 16744272,
-							footer      = { text = "VINZOHUB Key System" },
-							timestamp   = os.date("!%Y-%m-%dT%H:%M:%SZ")
-						}}
-					})
-				})
-			end)
-			return false, "❌ Key sudah expired! (" .. record.expired .. ")"
-		end
+	if isExpired(record.expired) then
+		sendWebhook(
+			"⏰ Key Expired",
+			"**Key:** `" .. key .. "`\n" ..
+			"**User:** " .. player.Name .. " (" .. tostring(player.UserId) .. ")\n" ..
+			"**Expired:** " .. (record.expired or "-"),
+			16744272 -- orange
+		)
+		return false, "❌ Key sudah expired! (" .. (record.expired or "-") .. ")"
 	end
 
-	-- Cek locked user (key sudah dipakai orang lain)
+	-- Cek locked - key sudah dipakai orang lain
 	if record.lockedUser and record.lockedUser ~= player.Name then
-		pcall(function()
-			HttpService:RequestAsync({
-				Url    = WEBHOOK_LOG,
-				Method = "POST",
-				Headers = { ["Content-Type"] = "application/json" },
-				Body   = HttpService:JSONEncode({
-					embeds = {{
-						title       = "🔒 Key Dicoba User Lain",
-						description = "**Key:** `" .. key .. "`\n**Dicoba oleh:** " .. player.Name .. " (" .. tostring(player.UserId) .. ")\n**Key milik:** " .. record.lockedUser,
-						color       = 16711680,
-						footer      = { text = "VINZOHUB Key System" },
-						timestamp   = os.date("!%Y-%m-%dT%H:%M:%SZ")
-					}}
-				})
-			})
-		end)
-		return false, "❌ Key ini sudah dipakai oleh " .. record.lockedUser .. "!"
+		sendWebhook(
+			"🔒 Key Dicoba User Lain",
+			"**Key:** `" .. key .. "`\n" ..
+			"**Dicoba oleh:** " .. player.Name .. " (" .. tostring(player.UserId) .. ")\n" ..
+			"**Key milik:** " .. record.lockedUser,
+			16711680 -- merah
+		)
+		return false, "❌ Key sudah dipakai oleh " .. record.lockedUser .. "!"
 	end
 
-	-- Lock key ke user ini (pertama kali pakai)
+	-- Pertama kali pakai -> lock ke user ini
 	local isFirstUse = not record.lockedUser
 	KEY_DATABASE[key].lockedUser = player.Name
 
 	local expStr = record.expired or "Permanent"
 
-	-- Kirim log sukses ke Discord
-	pcall(function()
-		HttpService:RequestAsync({
-			Url    = WEBHOOK_LOG,
-			Method = "POST",
-			Headers = { ["Content-Type"] = "application/json" },
-			Body   = HttpService:JSONEncode({
-				embeds = {{
-					title       = isFirstUse and "🔑 Key Pertama Kali Digunakan!" or "✅ Key Valid - Login",
-					description = "**Key:** `" .. key .. "`\n**User:** " .. player.Name .. " (" .. tostring(player.UserId) .. ")\n**Expired:** " .. expStr .. "\n**Status:** " .. (isFirstUse and "🆕 Baru di-lock ke user ini" or "🔄 Re-login"),
-					color       = isFirstUse and 16753920 or 65280,
-					footer      = { text = "VINZOHUB Key System" },
-					timestamp   = os.date("!%Y-%m-%dT%H:%M:%SZ")
-				}}
-			})
-		})
-	end)
+	-- Kirim log ke Discord (bot akan baca ini dan update keys.json)
+	if isFirstUse then
+		sendWebhook(
+			"🔑 Key Pertama Kali Digunakan!",
+			"**Key:** `" .. key .. "`\n" ..
+			"**User:** " .. player.Name .. " (" .. tostring(player.UserId) .. ")\n" ..
+			"**Expired:** " .. expStr .. "\n" ..
+			"**Status:** 🆕 Key di-lock ke user ini",
+			16753920 -- kuning
+		)
+	else
+		sendWebhook(
+			"✅ Key Valid - Re-login",
+			"**Key:** `" .. key .. "`\n" ..
+			"**User:** " .. player.Name .. " (" .. tostring(player.UserId) .. ")\n" ..
+			"**Expired:** " .. expStr .. "\n" ..
+			"**Status:** 🔄 Re-login",
+			65280 -- hijau
+		)
+	end
 
 	return true, "✅ Welcome " .. player.Name .. "! Exp: " .. expStr
 end
@@ -347,6 +354,7 @@ TweenService:Create(card, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingD
 
 -- =====================================================
 -- MAIN SCRIPT LOADER
+-- Paste script utama kamu di dalam function ini
 -- =====================================================
 function loadMainScript()
 
